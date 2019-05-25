@@ -11,42 +11,51 @@
 createPath <- function(savepath="data") {
   verbose <- TRUE
 
-  if (verbose) print("[*] Initial setup")
   set.seed(666)
   dir.data <- file.path(getwd(), savepath)
   if (!dir.exists(dir.data)) {
-    if (verbose) print("[*] Create data directory")
+    if (verbose) print("Directorio Creado.")
     dir.create(dir.data)
   }
   return (dir.data)
 }
 
-#' Funcion que descarga, descomprime y abre el dataframe de scansio en la carpeta especificada.
-#' Recordar que la carpeta debe crearse previamente con createPath(). Si no se especifica carpeta, default=data.
-#' @param savepath Introducir el nombre de la carpeta creada mediante la función createPath()
+#' Funcion que descarga, descomprime y abre un dataset de  scansio y lo almacena en la carpeta especificada.
+#' Si no se especifica carpeta, esta será default=data.
+#' @param data.url Introducir la url con el dataset en formato csv que queremos descargar.
+#' @param savepath Introducir el nombre de la carpeta donde guardaremos el dataset
+#' @param filename Introducir el nombre del fichero que contendrá el dataset
 #' @return Devuelve el dataframe descargado con los datos en crudo
 #' @examples
-#' downloadScanIO()
-#' tcp21=downloadScanIO() #guarda el dataframe resultante en la variable indicada
+#' url=https://opendata.rapid7.com/sonar.tcp/2019-04-20-1555731287-http_get_5000.csv.gz
+#' downloadScanIO(url,"http","scansio.http")
+#' dataset=downloadScanIO(url,"http","scansio.http") #guarda el dataframe resultante en la variable indicada
 #' \dontrun {
-#' downloadScanIO()
+#' downloadScanIO(url,"http","scansio.http")
 #'}
 #' \dontrun {
-#' tcp21=downloadScanIO()
+#' dataset=downloadScanIO(url,"http","scansio.http")
 #' }
-downloadScanIO <- function(savepath="data") {
+downloadScanIO <- function(data.url, savepath="data", filename) {
   verbose <- TRUE
-  scansio.url <- "https://opendata.rapid7.com/sonar.tcp/2019-04-04-1554350684-ftp_21.csv.gz"
+  scansio.url <- data.url
 
-  # scans.io - Obtener datos en crudo
-  if (verbose) print("[*] Read RAW data from scans.io")
-  scansio.source <- file.path(getwd(), savepath ,"scans.io.tcp21.csv")
-  scansio.file.gz <- paste(scansio.source, ".gz", sep = "")
+  # Revisa si la carpeta fue creada por createPath y sino la crea
+  dir.data <- file.path(getwd(), savepath)
+  if (!dir.exists(dir.data)) {
+    if (verbose) print("Directorio Ok.")
+    dir.create(dir.data)
+  }
+
+  # scans.io - Obtenemos los datos del dataset
+  scansio.source <- file.path(getwd(), savepath ,filename)
+  scansio.source.csv <- paste(scansio.source, ".csv" , sep = "")
+  scansio.file.gz <- paste(scansio.source.csv, ".gz", sep = "")
   download.file(url = scansio.url, destfile = scansio.file.gz)
   R.utils::gunzip(scansio.file.gz)
-  df.tcp21 <- read.csv(scansio.source, stringsAsFactors = FALSE)
+  df.port <- read.csv(scansio.source.csv, stringsAsFactors = FALSE)
   rm(scansio.file.gz)
-  return (df.tcp21)
+  return (df.port)
 }
 
 #' Funcion que descarga, descomprime y abre el dataframe de Maxmind en la carpeta especificada.
@@ -66,9 +75,12 @@ downloadMaxmind <- function(savepath="data") {
   verbose <- TRUE
   maxmind.url <- "https://geolite.maxmind.com/download/geoip/database/GeoLite2-City-CSV.zip"
 
-  dir.data <- createPath()
+  dir.data <- file.path(getwd(), savepath)
+  if (!dir.exists(dir.data)) {
+    if (verbose) print("Directorio Creado.")
+    dir.create(dir.data)
+  }
   # Maxmind - Obtener datos en crudo (city)
-  if (verbose) print("[*] Read RAW data from MaxMind")
   maxmind.file <- file.path(getwd(), savepath, "maxmind.zip")
   download.file(url = maxmind.url, destfile = maxmind.file)
   zipfiles <- unzip(zipfile = maxmind.file, list = T)
@@ -81,14 +93,15 @@ downloadMaxmind <- function(savepath="data") {
 
 }
 
-#' Funcion que genera una muestra del dataframe Scan.
+#' Funcion que genera un dataframe del dataset especificado.
 #' @param nrows Introducimos el número de filas que queremos que genere el dataframe.
-#' Dicho número debe ser igual o superior al scope, es decir igual o superior a 500 y inferior al número máximo de filas del dataframe.
-#' @param df.tcp21 Introducimos el dataframe de scan previamente descargado.
-#' @return Genera una muestra del dataframe.
+#' @param scope Introducimos el scope, si no se introduce valor default=500
+#' El valor de nrows debe ser < que scope.
+#' @param df.port Introducimos el dataset de scans.io previamente descargado.
+#' @return Genera un dataframe del dataset introducido.
 #' @examples
-#' generate.dfScan(5000,dataframe)
-#' df.scans=generate.dfScan(5000,dataframe) #guarda la muestra resultante en la variable indicada
+#' generate.dfScan(600,500,df.port)
+#' df.scans=generate.dfScan(600,500,df.port) #guarda la muestra resultante en la variable indicada
 #' \dontrun {
 #' generate.dfScan()
 #'}
@@ -96,15 +109,15 @@ downloadMaxmind <- function(savepath="data") {
 #' df.scans=generate.dfScan()
 #'}
 
-generate.dfScan <- function(nrows, df.tcp21){
+generate.dfScan <- function(nrows, scope=500, df.port){
 verbose <- TRUE
-# Seleccionamos una muestra de scans
-scope <- 500
-if (verbose) print("[*] Subseting scans data set")
-df.tcp21$saddr.num <- iptools::ip_to_numeric(df.tcp21$saddr)
-df.tcp21$daddr.num <- iptools::ip_to_numeric(df.tcp21$daddr)
+# Seleccionamos una muestra del dataset
+if(nrows<scope)
+  return(print("el valor de nrows debe ser mayor o igual que scope, vuelva a introducir los datos"))
+df.port$saddr.num <- iptools::ip_to_numeric(df.port$saddr)
+df.port$daddr.num <- iptools::ip_to_numeric(df.port$daddr)
 muestra <- sample(1:nrows, scope)
-df.scans <- df.tcp21[muestra,]
+df.scans <- df.port[muestra,]
 rm(muestra)
 return (df.scans)
 }
@@ -123,7 +136,6 @@ return (df.scans)
 #'}
 generate.dfMaxmind <- function(df.maxmind){
     verbose <- TRUE
-if (verbose) print("[*] Expanding MaxMind network ranges")
 df.maxmind <- cbind(df.maxmind, iptools::range_boundaries(df.maxmind$network))
 df.maxmind$rowname <- as.integer(row.names(df.maxmind))
 return (df.maxmind)
@@ -189,15 +201,15 @@ return (df)
 #' \dontrun {
 #' summaryDF()
 #' }
-summaryDf <- function(df){
+summaryDf <- function(df, savepath="data"){
     verbose <- TRUE
     output.file <- "geoftps.rds"
-      tini <- Sys.time()
+    tini <- Sys.time()
 
 if (verbose) print("[*] Tidy data and save it")
 df$is_anonymous_proxy <- as.factor(df$is_anonymous_proxy)
 df$is_satellite_provider <- as.factor(df$is_satellite_provider)
-saveRDS(object = df, file = file.path(getwd(), "data", output.file))
+saveRDS(object = df, file = file.path(getwd(), savepath, output.file))
 fini <- Sys.time()
 
 # Summary
