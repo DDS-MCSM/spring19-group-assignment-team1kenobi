@@ -235,7 +235,7 @@ summary(df)
 addCountry <- function(df){
 
   ## The df that is used in this function must have columms names slongitude and slatitude for the GPS coordinates.
-  df$country_test_2<-map.where(database = "world",df$`Longitud origen`,df$`Latitud origen`)
+  df$COUNTRY<-map.where(database = "world",df$LONGITUD_O,df$LATITUD_O)
   return(df)
 }
 
@@ -249,11 +249,11 @@ addCountry <- function(df){
 printWorldMap <- function(df) {
 
   colorPalette <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")
-  df.count.sort  <-  dplyr::count(df, country, sort=TRUE)
-  df.withoutna  <- df.count.sort[!is.na(df.count.sort$country),]
+  df.count.sort  <-  dplyr::count(df, COUNTRY, sort=TRUE)
+  df.withoutna  <- df.count.sort[!is.na(df.count.sort$COUNTRY),]
   rworld  = rworldmap::joinCountryData2Map(dF = df.withoutna,
                                            joinCode = "NAME",
-                                           nameJoinColumn = "country")
+                                           nameJoinColumn = "COUNTRY")
 
   rworldmap::mapCountryData(rworld,
                             nameColumnToPlot = "n",
@@ -273,14 +273,14 @@ printWorldMap <- function(df) {
 #' }
 printBarplot <- function (df) {
 
-  a  <-  dplyr::count(df, country, sort = TRUE)
-  a <- a[!is.na(a$country),]
+  a  <-  dplyr::count(df, COUNTRY, sort = TRUE)
+  a <- a[!is.na(a$COUNTRY),]
   a2<-dplyr::top_n(a, 10)
   par(mar=c(6,5,3,1))
   barplot(a2$n,
-          main = "HTTP",
+          main = "HTTPS",
           ylim = c(0,900),
-          names.arg = a2$country,
+          names.arg = a2$COUNTRY,
           col = "darkred",
           cex.names =.7, las=2)
 
