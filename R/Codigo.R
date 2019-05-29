@@ -1,3 +1,8 @@
+library(maps)
+library(dplyr)
+library(rworldmap)
+library(rworldxtra)
+
 #' Función que permite la creación de un path donde almacenaremos nuestro dataframe
 #'
 #' @param savepath Define el nombre de la carpeta donde guardaremos el dataframe. Si no indicamos ningun parámetro Default = data
@@ -176,10 +181,9 @@ rm(cl, no_cores)
 # Join and tidy data frame (source address)
 if (verbose) print("[*] Joining source IP's with geolocation data")
 df <- dplyr::left_join(df.scans, df.maxmind, by = c("sloc" = "rowname"))
-df <- dplyr::select(df, timestamp_ts, saddr, latitude, longitude, accuracy_radius,
-                    is_anonymous_proxy, is_satellite_provider)
-names(df) <- c("timestamp_ts", "saddr", "slatitude", "slongitude",
-               "accuracy_radius", "is_anonymous_proxy", "is_satellite_provider")
+df <- dplyr::select(df, saddr, latitude, longitude, accuracy_radius)
+names(df) <- c("IP_ORIGEN", "LATITUD_O", "LONGITUD_O",
+               "PRECISION")
 
 # Join and tidy data frame (destination address)
 if (verbose) print("[*] Joining destination IP's with geolocation data")
@@ -187,9 +191,10 @@ suppressMessages(library(dplyr))
 df.dst <- df.scans %>%
   left_join(df.maxmind, by = c("dloc" = "rowname")) %>%
   select(daddr, latitude, longitude)
-names(df.dst) <- c("daddr", "dlatitude", "dlongitude")
+names(df.dst) <- c("IP_DESTINO", "LATITUD_D", "LONGITUD_D")
 df <- dplyr::bind_cols(df, df.dst)
 rm(df.dst, df.scans)
+
 return (df)
 }
 
@@ -212,7 +217,79 @@ df$is_satellite_provider <- as.factor(df$is_satellite_provider)
 saveRDS(object = df, file = file.path(getwd(), savepath, output.file))
 fini <- Sys.time()
 
-# Summary
 fini - tini
 summary(df)
+}
+
+#' Función que añade una columna al dataframe con el pais al que corresponde la longitud y latitud de origen de cara fila del dataframe.
+#' @param df Introducimos el dataframe generado mediante las dos muestras.
+#' @return Devuelve el df con la columna Country incluida.
+#' @examples
+#' addCountry(df)
+#' df.Country= addCountry(df)
+#' \dontrun {
+#' addCountry()
+#' }
+#'
+addCountry <- function(df){
+
+  ## The df that is used in this function must have columms names slongitude and slatitude for the GPS coordinates.
+  df$country_test_2<-map.where(database = "world",df$`Longitud origen`,df$`Latitud origen`)
+  return(df)
+}
+
+#' generate.dfMaxmind(maxmind)
+#' df.maxmind=generate.dfMaxmind() #guarda la muestra resultante en la variable indicada
+#' \dontrun {
+#' generate.dfMaxmind()
+#'}
+#' \dontrun {
+#' df.maxmind=generate.dfMaxmind()
+#'}
+
+#' Función que devuelve un mapa mundo coloreado, donde cuanto más oscuro es el color, implica que en ese pais hay más conexiones.
+#' @param df Introducimos el dataframe una vez incluida la columna Country.
+#' @examples
+#' printWorldMap(df)
+#' \dontrun {
+#' printWorldMap()
+#' }
+printWorldMap <- function(df) {
+
+  colorPalette <- RColorBrewer::brewer.pal(n = 9, name = "YlOrRd")
+  df.count.sort  <-  dplyr::count(df, country, sort=TRUE)
+  df.withoutna  <- df.count.sort[!is.na(df.count.sort$country),]
+  rworld  = rworldmap::joinCountryData2Map(dF = df.withoutna,
+                                           joinCode = "NAME",
+                                           nameJoinColumn = "country")
+
+  rworldmap::mapCountryData(rworld,
+                            nameColumnToPlot = "n",
+                            catMethod = "categorical",
+                            mapTitle = "Comparativa",
+                            addLegend = F,
+                            colourPalette = colorPalette)
+
+}
+
+#' Función que devuelve una gráfica de los 10 paises con más conexiones.
+#' @param df Introducimos el dataframe una vez incluida la columna Country.
+#' @examples
+#' printBarplot(df)
+#' \dontrun {
+#' printBarplot()
+#' }
+printBarplot <- function (df) {
+
+  a  <-  dplyr::count(df, country, sort = TRUE)
+  a <- a[!is.na(a$country),]
+  a2<-dplyr::top_n(a, 10)
+  par(mar=c(6,5,3,1))
+  barplot(a2$n,
+          main = "HTTP",
+          ylim = c(0,900),
+          names.arg = a2$country,
+          col = "darkred",
+          cex.names =.7, las=2)
+
 }
