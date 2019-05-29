@@ -100,7 +100,7 @@ downloadMaxmind <- function(savepath="data") {
 
 #' Funcion que genera un dataframe del dataset especificado.
 #' @param nrows Introducimos el número de filas que queremos que genere el dataframe.
-#' @param scope Introducimos el scope, si no se introduce valor default=500
+#' @param scope Introducimos el scope, que será el número de filas que tendrá la muestra. Si no se introduce el valor default=500
 #' El valor de nrows debe ser < que scope.
 #' @param df.port Introducimos el dataset de scans.io previamente descargado.
 #' @return Genera un dataframe del dataset introducido.
@@ -231,21 +231,13 @@ summary(df)
 #' addCountry()
 #' }
 #'
+
 addCountry <- function(df){
 
   ## The df that is used in this function must have columms names slongitude and slatitude for the GPS coordinates.
   df$country_test_2<-map.where(database = "world",df$`Longitud origen`,df$`Latitud origen`)
   return(df)
 }
-
-#' generate.dfMaxmind(maxmind)
-#' df.maxmind=generate.dfMaxmind() #guarda la muestra resultante en la variable indicada
-#' \dontrun {
-#' generate.dfMaxmind()
-#'}
-#' \dontrun {
-#' df.maxmind=generate.dfMaxmind()
-#'}
 
 #' Función que devuelve un mapa mundo coloreado, donde cuanto más oscuro es el color, implica que en ese pais hay más conexiones.
 #' @param df Introducimos el dataframe una vez incluida la columna Country.
