@@ -6,7 +6,7 @@ output: html_document
 
 #### **Creación directorios**
 
-Para empezar creamos las carpetas donde se almacenarán los datos.
+Para empezar se crean las carpetas donde se almacenarán los datos.
 
 ```{r}
 dds.base::createPath("http")
@@ -16,11 +16,12 @@ dds.base::createPath("maxmind")
 
 #### **Descarga datasets**
 
-Una vez creadas las carpetas, descargamos los datasets. En este caso hemos elegido los datasets **HTTP** y **HTTPS**, los cuales compararemos posteriormente. A pesar de esto, el código también funciona para cualquier otro dataset(csv) de rapid7
-URL datasets:
+Una vez creadas, se descargan los datasets. En este caso **HTTP** y **HTTPS**, los cuales se compararán posteriormente. Comentar que el código funciona para cualquier otro dataset(csv) de rapid7.
+
+**URL datasets:**
 - https://opendata.rapid7.com/sonar.tcp/
 
-Datasets HTTP y HTTPS:
+**Datasets HTTP y HTTPS:**
 
 - https://opendata.rapid7.com/sonar.tcp/2019-04-20-1555731287-http_get_5000.csv.gz
 - https://opendata.rapid7.com/sonar.tcp/2019-04-20-1555735028-https_get_5001.csv.gz
@@ -30,51 +31,65 @@ ds.http=dds.base::downloadScanIO("https://opendata.rapid7.com/sonar.tcp/2019-04-
 ds.https=dds.base::downloadScanIO("https://opendata.rapid7.com/sonar.tcp/2019-04-20-1555735028-https_get_5001.csv.gz","https","scansio.https")
 
 ds.maxmind=dds.base::downloadMaxmind("maxmind")
-
 ```
 
 #### **Generación Dataframes**
 
-Generamos muestras de los datasets especificados:
-
-#### **HTTP y HTTPS**
+Se generan muestras de los datasets especificados: **HTTP y HTTPS**
 
 Dichos dataframes contienen información de conexiones **HTTP** y **HTTPS** mostrando las IP's origen y destino de la comunicación.
 
-- **HTTP**: Generamos una muestra del dataset HTTP con los parámetros nrows=600 y scope=500. Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
-- **HTTPS**: Generamos una muestra del dataset HTTPS con los parámetros nrows=600 y scope=500. Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
+- **HTTP**: Se genera una muestra del dataset HTTP con los parámetros nrows=3000(total de filas posibles a mostrar) y scope=3000(total de filas mostradas). Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
+- **HTTPS**: Se genera una muestra del dataset HTTP con los parámetros nrows=3000(total de filas posibles a mostrar) y scope=3000(total de filas mostradas). Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
 
+Se genera dataframe del dataset **MAXMIND**
 
-#### **MAXMIND**
+Dicho dataframe contiene información sobre la geolocalización de diferentes rangos IP (REDES).
 
-Dicho dataframe contiene información sobre la geolocalización de diferentes rangos ip (redes).
-
-- **maxmind**: Generamos un dataframe cambiando el valor de las redes por su ip max y min. Ej: 192.168.1.0/24 -> min:192.168.1.1 // max:192.168.1.255
+- **MAXMIND**: Se genera dataframe cambiando el valor de las redes por su IP MAX y MIN. Ej: 192.168.1.0/24 -> min:192.168.1.1 // max:192.168.1.255
 
 ```{r}
-df.http=dds.base::generate.dfScan(600,500,ds.http)
-df.https=dds.base::generate.dfScan(600,500,ds.https)
+df.http=dds.base::generate.dfScan(3000,3000,ds.http)
+df.https=dds.base::generate.dfScan(3000,3000,ds.https)
 df.maxmind=dds.base::generate.dfMaxmind(ds.maxmind)
-
 ```
+
 #### **Unión dataframes**
-Seguidamente juntamos cada uno de los dataframe **HTTP** y **HTTPS** con el dataframe maxmind para obtener la geolocalización de cada una de sus ips origen y destino.
+Se junta cada uno de los dataframe **HTTP** y **HTTPS** con el dataframe Maxmind para obtener la geolocalización de las IP origen y destino.
 
 ```{r}
 df.http.maxmind=dds.base::cleanAndJoin.df(df.http,df.maxmind)
 df.https.maxmind=dds.base::cleanAndJoin.df(df.https,df.maxmind)
 ```
-#### **Mostramos dataframes HTTP y HTTPS**
-Para terminar, mostramos los dataframe resultantes.
-```{r}
-DT::datatable(df.http.maxmind)
-DT::datatable(df.https.maxmind)
 
+#### **Se añade Country**
+Se procesa la longitud y latitud de la IP origen y devuelve el pais asociado. 
+```{r}
+df.http.country=dds.base::addCountry(df.http.maxmind)
+df.https.country=dds.base::addCountry(df.https.maxmind)
 ```
 
-#### **Geolocalización IP**
-Próximanente...
+#### **Dataframe HTTP y HTTPS**
+Se muestra los dataframe resultantes, en este caso mostramos el Dataframe HTTP a modo ejemplo, dejando el HTTPS comentado por si se quisiera visualizar.
+```{r}
+DT::datatable(df.http.country)
+##DT::datatable(df.https.country)
+```
 
-En el siguiente apartado mostraremos un mapa con la geolocalización de cada una de las ip's que han realizado una conexión HTTP y HTTPS para analizar en que zonas del mundo se realizan conexiones seguras y en que zonas no.
+#### **Barplot**
+Se filtran los datos para obtener la cantidad de conexiones por pais y seguidamente se muestran con un barplot.
 
-Probablemente añadiremos más análisis pero aún no los hemos defindo.
+```{r}
+dds.base::printBarplot(df.http.country)
+dds.base::printBarplot(df.https.country)
+```
+
+
+#### **WorldMap**
+Se filtran los datos para obtener la cantidad de conexiones por pais y seguidamente se muestran en un mapa mundo.
+
+```{r}
+df.http.country=dds.base::addCountry(df.http.maxmind)
+df.https.country=dds.base::addCountry(df.https.maxmind)
+```
+
