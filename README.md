@@ -10,10 +10,10 @@ y representar el numero de coneiones en un grafio de barras.
 
 ## Instalacion
 
-You can install the released version of dds.base from [Github](https://github.com/DDS-MCSM/dds.base) with:
+POdemos instalar el paquete desde: [Github](https://github.com/DDS-MCSM/spring19-group-assignment-team1kenobi) with:
 
 ``` r
-devtools::install_.packages_github("DDS-MCSM/dds.base")
+devtools::install_github("DDS-MCSM/spring19-group-assignment-team1kenobi")
 ```
 
 ## Obteniendo los datos 
