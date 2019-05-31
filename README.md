@@ -18,7 +18,6 @@ devtools::install_github("DDS-MCSM/spring19-group-assignment-team1kenobi")
 
 ## Obtención de datos
 
-### Conexiones HTTP/HTTPS con información sobre su geolocalización 
 La obtención y normalización de los datasets para realizar el estudio se realiza mediante las siguientes funciones:
 
 #### createPath
