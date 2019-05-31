@@ -9,7 +9,7 @@ El objetivo del Package es el análisis de los datasets HTTP y HTTPS de Rapid7 p
 
 ## Instalación
 
-Se puede encontrar el package en github: [Github](https://github.com/DDS-MCSM/spring19-group-assignment-team1kenobi) y podemos instalarlo con RStudio mediante el siguiente comando:
+Se puede encontrar el package en el siguiente enlace: [Github](https://github.com/DDS-MCSM/spring19-group-assignment-team1kenobi) y podemos instalarlo con RStudio mediante el siguiente comando:
 
 ``` r
 devtools::install_github("DDS-MCSM/spring19-group-assignment-team1kenobi")
