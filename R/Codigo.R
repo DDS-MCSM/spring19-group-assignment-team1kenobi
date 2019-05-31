@@ -3,6 +3,7 @@ library(dplyr)
 library(rworldmap)
 library(rworldxtra)
 
+
 #' Función que permite la creación de un path donde almacenaremos nuestro dataframe
 #'
 #' @param savepath Define el nombre de la carpeta donde guardaremos el dataframe. Si no indicamos ningun parámetro Default = data
@@ -235,7 +236,7 @@ summary(df)
 addCountry <- function(df){
 
   ## The df that is used in this function must have columms names slongitude and slatitude for the GPS coordinates.
-  df$COUNTRY<-map.where(database = "world",df$LONGITUD_O,df$LATITUD_O)
+  df$COUNTRY<-maps::map.where(database = "world",df$LONGITUD_O,df$LATITUD_O)
   return(df)
 }
 

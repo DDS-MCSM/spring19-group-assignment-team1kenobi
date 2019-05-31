@@ -1,7 +1,9 @@
 ---
 title: "Comparativa conexiones HTTP y HTTPS"
 author: "Team1kenobi"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 #### **Creación directorios**
@@ -40,7 +42,7 @@ Se generan muestras de los datasets especificados: **HTTP y HTTPS**
 Dichos dataframes contienen información de conexiones **HTTP** y **HTTPS** mostrando las IP's origen y destino de la comunicación.
 
 - **HTTP**: Se genera una muestra del dataset HTTP con los parámetros nrows=3000(total de filas posibles a mostrar) y scope=3000(total de filas mostradas). Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
-- **HTTPS**: Se genera una muestra del dataset HTTPS con los parámetros nrows=3000(total de filas posibles a mostrar) y scope=3000(total de filas mostradas). Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
+- **HTTPS**: Se genera una muestra del dataset HTTP con los parámetros nrows=3000(total de filas posibles a mostrar) y scope=3000(total de filas mostradas). Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
 
 Se genera dataframe del dataset **MAXMIND**
 
@@ -62,8 +64,8 @@ df.http.maxmind=dds.base::cleanAndJoin.df(df.http,df.maxmind)
 df.https.maxmind=dds.base::cleanAndJoin.df(df.https,df.maxmind)
 ```
 
-#### **Se añade Pais**
-Se procesa la longitud y latitud de la IP origen y devuelve el pais asociado. 
+#### **Se añade Country**
+Se procesa la longitud y latitud de la IP origen de cada fila del dataframe y se consigue el pais asociado. 
 ```{r}
 df.http.country=dds.base::addCountry(df.http.maxmind)
 df.https.country=dds.base::addCountry(df.https.maxmind)
@@ -77,7 +79,7 @@ DT::datatable(df.http.country)
 ```
 
 #### **Barplot**
-Se filtran los datos para obtener la cantidad de conexiones por pais y seguidamente se muestran con un barplot.
+Se filtran los datos del dataframe para que muestre solo la cantidad de conexiones asociada a cada pais y seguidamente se muestran los datos con un barplot.
 
 ```{r}
 dds.base::printBarplot(df.http.country)
@@ -86,10 +88,10 @@ dds.base::printBarplot(df.https.country)
 
 
 #### **WorldMap**
-Se filtran los datos para obtener la cantidad de conexiones por pais y seguidamente se muestran en un mapa mundo.
+Se filtran los datos del dataframe para que muestre solo la cantidad de conexiones asociada a cada pais y seguidamente se muestran los datos en un mapa mundo.
 
 ```{r}
-df.http.country=dds.base::addCountry(df.http.maxmind)
-df.https.country=dds.base::addCountry(df.https.maxmind)
+df.http.country=dds.base::printWorldMap(df.http.country)
+df.https.country=dds.base::printWorldMap(df.https.country)
 ```
 
