@@ -279,7 +279,7 @@ printBarplot <- function (df) {
   a2<-dplyr::top_n(a, 10)
   par(mar=c(6,5,3,1))
   barplot(a2$n,
-          main = "HTTPS",
+          main = "BARPLOT",
           ylim = c(0,900),
           names.arg = a2$COUNTRY,
           col = "darkred",
