@@ -40,7 +40,7 @@ Se generan muestras de los datasets especificados: **HTTP y HTTPS**
 Dichos dataframes contienen información de conexiones **HTTP** y **HTTPS** mostrando las IP's origen y destino de la comunicación.
 
 - **HTTP**: Se genera una muestra del dataset HTTP con los parámetros nrows=3000(total de filas posibles a mostrar) y scope=3000(total de filas mostradas). Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
-- **HTTPS**: Se genera una muestra del dataset HTTP con los parámetros nrows=3000(total de filas posibles a mostrar) y scope=3000(total de filas mostradas). Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
+- **HTTPS**: Se genera una muestra del dataset HTTPS con los parámetros nrows=3000(total de filas posibles a mostrar) y scope=3000(total de filas mostradas). Dichos parámetros pueden modificarse para generar dataframes con diferentes valores, siempre que se respete la siguiente condición (nrows<scope).
 
 Se genera dataframe del dataset **MAXMIND**
 
@@ -62,7 +62,7 @@ df.http.maxmind=dds.base::cleanAndJoin.df(df.http,df.maxmind)
 df.https.maxmind=dds.base::cleanAndJoin.df(df.https,df.maxmind)
 ```
 
-#### **Se añade Country**
+#### **Se añade Pais**
 Se procesa la longitud y latitud de la IP origen y devuelve el pais asociado. 
 ```{r}
 df.http.country=dds.base::addCountry(df.http.maxmind)
