@@ -60,7 +60,7 @@ Función que genera una muestra del dataset especificado.
 - @param **nrows** Introducimos el número de filas que queremos que genere el dataframe.
 - @param **scope** Introducimos el número de filas que tendrá la muestra. Si no se introduce el valor default=500.(Consideramos que una muestra debe tener como mínimo 500 resultados)
 Importante remarcar que **el valor de nrows debe ser mayor o igual que scope.**
-- @param df.port Introducimos el dataset de scans.io previamente descargado.
+- @param **df.port** Introducimos el dataset de scans.io previamente descargado.
 
 ```{r}
 generate.dfScan <- function(nrows, scope=500, df.port)
